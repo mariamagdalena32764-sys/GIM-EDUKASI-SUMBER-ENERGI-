@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Energi Cilik - Gim Edukasi Kelas 3 SD</title>
+    
+    <!-- Tailwind CSS for modern design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for child-friendly typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js for cute game sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        body {
+            font-family: 'Fredoka', 'Nunito', sans-serif;
+            background: radial-gradient(circle, #e0f2fe 0%, #bae6fd 100%);
+            overflow-x: hidden;
+        }
+        
+        .avatar-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .avatar-option:hover {
+            transform: scale(1.15);
+        }
+        .avatar-active {
+            border-color: #facc15 !important;
+            background-color: #fef08a !important;
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Smooth bounce animation for floating mascot */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+        .float-mascot {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Pulsing light effect for stars and energy */
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(253, 224, 71, 0.6)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 15px rgba(253, 224, 71, 0.9)); }
+        }
+        .pulse-energy {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        /* Custom scrollbar for learning block */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Confetti effect particles */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f39c12;
+            opacity: 0.8;
+            border-radius: 50%;
+            animation: fall 3s linear infinite;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-100px) rotate(0deg); }
+            100% { transform: translateY(100vh) rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-800">
+
+    <!-- Top Navigation / Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-md border-b-4 border-sky-300 sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showScreen('home')">
+                <div class="bg-yellow-400 p-2 rounded-2xl shadow-inner pulse-energy">
+                    <i class="fa-solid fa-bolt text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-sky-600 tracking-wide leading-none">Pahlawan Energi</h1>
+                    <span class="text-xs md:text-sm font-semibold text-amber-500">Kelas 3 SD Edu-Gim</span>
+                </div>
+            </div>
+            <!-- Star Count / Progress Tracker & Student Identity Info -->
+            <div class="flex items-center gap-3 md:gap-4">
+                <!-- Mini Profile Bubble -->
+                <div id="header-profile-badge" class="hidden md:flex items-center gap-2 bg-sky-50 border-2 border-sky-200 rounded-full px-3 py-1">
+                    <span id="header-avatar" class="text-xl">🤖</span>
+                    <div class="text-left">
+                        <p id="header-student-name" class="text-xs font-bold text-sky-800 leading-none truncate max-w-[100px]">Siswa Hebat</p>
+                        <p id="header-student-school" class="text-[9px] text-sky-600 font-semibold leading-none">SD Nusantara</p>
+                    </div>
+                </div>
+                
+                <div class="bg-amber-100 border-2 border-amber-400 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-star text-amber-500 text-lg animate-spin-slow"></i>
+                    <span id="star-count" class="font-bold text-amber-700 text-lg">0</span>
+                </div>
+                <button id="btn-sound" onclick="toggleMute()" class="w-10 h-10 rounded-full bg-sky-100 hover:bg-sky-200 text-sky-600 flex items-center justify-center border-2 border-sky-300 transition-all shadow-sm">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-6 flex flex-col justify-center">
+
+        <!-- SCREEN 1: HOME PAGE / DASHBOARD -->
+        <div id="screen-home" class="screen-view flex flex-col md:flex-row items-stretch gap-8 justify-center py-4">
+            <!-- Left Side: Character, Intro, and Identity Setup Card -->
+            <div class="w-full md:w-1/2 flex flex-col gap-6">
+                
+                <!-- Identitas Pahlawan Card -->
+                <div class="bg-white/95 rounded-3xl p-5 shadow-xl border-4 border-yellow-300 relative">
+                    <div class="absolute -top-4 -right-2 bg-amber-400 text-slate-900 font-bold px-3 py-1 text-xs rounded-full shadow-md transform rotate-6">
+                        Kartu Identitas 🛡️
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-address-card text-sky-500"></i> Lengkapi Profilmu:
+                    </h3>
+                    
+                    <!-- Input Fields -->
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">NAMA LENGKAP SISWA:</label>
+                            <input type="text" id="input-student-name" oninput="saveStudentIdentity()" class="w-full px-4 py-2 text-sm font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-sky-400 focus:bg-white focus:outline-none transition-all" placeholder="Tulis Namamu di sini...">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">KELAS:</label>
+                                <input type="text" id="input-student-class" value="3" oninput="saveStudentIdentity()" class="w-full px-4 py-2 text-sm font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-sky-400 focus:bg-white focus:outline-none transition-all" placeholder="Misal: 3-A">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1">NAMA SEKOLAH:</label>
+                                <input type="text" id="input-student-school" oninput="saveStudentIdentity()" class="w-full px-4 py-2 text-sm font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-sky-400 focus:bg-white focus:outline-none transition-all" placeholder="SD Nusantara">
+                            </div>
+                        </div>
+                        
+                        <!-- Avatar Selection -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">PILIH AVATAR PAHLAWANMU:</label>
+                            <div class="flex justify-between gap-1 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                <button onclick="selectAvatar('🤖')" id="avatar-🤖" class="avatar-option text-2xl p-2 rounded-lg border-2 border-transparent avatar-active">🤖</button>
+                                <button onclick="selectAvatar('🦸')" id="avatar-🦸" class="avatar-option text-2xl p-2 rounded-lg border-2 border-transparent">🦸</button>
+                                <button onclick="selectAvatar('🦸‍♀️')" id="avatar-🦸‍♀️" class="avatar-option text-2xl p-2 rounded-lg border-2 border-transparent">🦸‍♀️</button>
+                                <button onclick="selectAvatar('🧑‍🚀')" id="avatar-🧑‍🚀" class="avatar-option text-2xl p-2 rounded-lg border-2 border-transparent">🧑‍🚀</button>
+                                <button onclick="selectAvatar('🦁')" id="avatar-🦁" class="avatar-option text-2xl p-2 rounded-lg border-2 border-transparent">🦁</button>
+                                <button onclick="selectAvatar('🦊')" id="avatar-🦊" class="avatar-option text-2xl p-2 rounded-lg border-2 border-transparent">🦊</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Eno Greeting Card -->
+                <div class="bg-white/90 rounded-2xl p-4 shadow-md border-2 border-sky-200 relative">
+                    <div class="absolute -top-3 left-10 md:left-6 w-6 h-6 bg-white rotate-45 border-t-2 border-l-2 border-sky-200"></div>
+                    <p class="text-sm md:text-base font-medium text-slate-700">
+                        "Halo Teman-Teman! Aku Eno. Yuk, kita berpetualang mencari tahu dari mana datangnya kekuatan untuk bergerak di bumi ini! Apakah kamu siap menjadi <strong class="text-amber-500">Pahlawan Energi</strong>?"
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Side: Menu Buttons -->
+            <div class="w-full md:w-1/2 flex flex-col gap-4">
+                <!-- Menu 1 -->
+                <button onclick="startBelajar()" class="group relative bg-gradient-to-r from-emerald-400 to-green-500 text-white rounded-2xl p-5 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-95 transition-all text-left border-b-4 border-green-700 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-white/20 p-3 rounded-xl group-hover:rotate-12 transition-transform">
+                            <i class="fa-solid fa-book-open text-3xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold tracking-wide">1. Belajar Energi</h3>
+                            <p class="text-xs text-green-100">Ketahui rahasia matahari, air, & angin!</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-circle-play text-2xl opacity-80 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+
+                <!-- Menu 2 -->
+                <button onclick="startGameCatcher()" class="group relative bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-2xl p-5 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-95 transition-all text-left border-b-4 border-orange-700 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-white/20 p-3 rounded-xl group-hover:rotate-12 transition-transform">
+                            <i class="fa-solid fa-basket-shopping text-3xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold tracking-wide">2. Tangkap Energi!</h3>
+                            <p class="text-xs text-orange-100">Tangkap energi baik, hindari polusi asap!</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-circle-play text-2xl opacity-80 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+
+                <!-- Menu 3 -->
+                <button onclick="startGameMatching()" class="group relative bg-gradient-to-r from-purple-400 to-indigo-500 text-white rounded-2xl p-5 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-95 transition-all text-left border-b-4 border-indigo-700 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-white/20 p-3 rounded-xl group-hover:rotate-12 transition-transform">
+                            <i class="fa-solid fa-puzzle-piece text-3xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold tracking-wide">3. Pasangan Energi!</h3>
+                            <p class="text-xs text-indigo-100">Pasangkan energi dengan manfaat kerennya.</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-circle-play text-2xl opacity-80 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+
+                <!-- Menu 4 -->
+                <button onclick="startQuiz()" class="group relative bg-gradient-to-r from-sky-400 to-blue-500 text-white rounded-2xl p-5 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-95 transition-all text-left border-b-4 border-blue-700 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-white/20 p-3 rounded-xl group-hover:rotate-12 transition-transform">
+                            <i class="fa-solid fa-graduation-cap text-3xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold tracking-wide">4. Kuis Pintar Energi</h3>
+                            <p class="text-xs text-sky-100">Uji ilmumu dan raih lencana Pahlawan!</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-circle-play text-2xl opacity-80 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: LEARNING CENTER (BELAJAR ENERGI) -->
+        <div id="screen-belajar" class="screen-view hidden bg-white/90 rounded-3xl p-6 shadow-xl border-4 border-emerald-300 max-w-4xl mx-auto w-full">
+            <div class="flex justify-between items-center border-b-2 border-emerald-100 pb-4 mb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-emerald-500 text-2xl"></i>
+                    <h2 class="text-2xl font-bold text-slate-800">Mari Belajar Sumber Energi!</h2>
+                </div>
+                <button onclick="showScreen('home')" class="bg-red-100 hover:bg-red-200 text-red-600 px-4 py-1.5 rounded-full font-bold text-sm border border-red-300 transition-colors">
+                    <i class="fa-solid fa-house mr-1"></i> Menu Utama
+                </button>
+            </div>
+
+            <!-- Learning Card Container -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Sidebar / Navigation topics -->
+                <div class="md:col-span-1 flex flex-col gap-2 bg-emerald-50/50 p-3 rounded-2xl border border-emerald-100">
+                    <h4 class="text-sm font-bold text-emerald-800 uppercase px-2 mb-2">Pilih Sumber Energi:</h4>
+                    <button onclick="loadTopic('matahari')" id="tab-matahari" class="tab-btn w-full text-left p-3 rounded-xl font-bold transition-all flex items-center gap-3 bg-emerald-500 text-white shadow-md">
+                        <span class="text-xl">☀️</span> Matahari
+                    </button>
+                    <button onclick="loadTopic('air')" id="tab-air" class="tab-btn w-full text-left p-3 rounded-xl font-bold transition-all flex items-center gap-3 text-emerald-700 hover:bg-emerald-100">
+                        <span class="text-xl">💧</span> Aliran Air
+                    </button>
+                    <button onclick="loadTopic('angin')" id="tab-angin" class="tab-btn w-full text-left p-3 rounded-xl font-bold transition-all flex items-center gap-3 text-emerald-700 hover:bg-emerald-100">
+                        <span class="text-xl">💨</span> Angin Sepoi
+                    </button>
+                    <button onclick="loadTopic('makanan')" id="tab-makanan" class="tab-btn w-full text-left p-3 rounded-xl font-bold transition-all flex items-center gap-3 text-emerald-700 hover:bg-emerald-100">
+                        <span class="text-xl">🍎</span> Makanan Kita
+                    </button>
+                    <button onclick="loadTopic('listrik')" id="tab-listrik" class="tab-btn w-full text-left p-3 rounded-xl font-bold transition-all flex items-center gap-3 text-emerald-700 hover:bg-emerald-100">
+                        <span class="text-xl">⚡</span> Energi Listrik
+                    </button>
+                </div>
+
+                <!-- Main Content Panel -->
+                <div class="md:col-span-2 bg-white rounded-2xl p-5 border-2 border-slate-100 shadow-inner flex flex-col justify-between min-h-[350px]">
+                    <div id="learning-content" class="space-y-4">
+                        <!-- Dynamic Content injected here -->
+                    </div>
+
+                    <!-- Bonus Action / Interaction -->
+                    <div class="mt-6 p-4 bg-sky-50 rounded-xl border border-sky-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl" id="topic-animation">☀️</span>
+                            <div>
+                                <h5 class="font-bold text-sky-800 text-sm" id="interact-title">Coba Ketuk Energi!</h5>
+                                <p class="text-xs text-sky-600" id="interact-subtitle">Dapatkan bonus bintang pertamamu!</p>
+                            </div>
+                        </div>
+                        <button id="btn-interact" onclick="interactTopic()" class="bg-amber-400 hover:bg-amber-500 text-amber-900 font-bold px-4 py-2 rounded-xl text-sm shadow transition-transform hover:scale-105">
+                            Cobalah! ✨
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: GAME 1 - CATCHER (TANGKAP ENERGI) -->
+        <div id="screen-game-catcher" class="screen-view hidden bg-sky-100 rounded-3xl p-6 shadow-xl border-4 border-amber-300 max-w-3xl mx-auto w-full relative overflow-hidden">
+            <div class="flex justify-between items-center border-b-2 border-sky-200 pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-basket-shopping text-amber-500 text-2xl"></i>
+                    <h2 class="text-xl font-bold text-slate-800">Gim: Tangkap Energi Baik!</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="bg-white/80 border border-sky-300 rounded-full px-3 py-1 font-bold text-sky-700 text-sm">
+                        Skor: <span id="catcher-score" class="text-amber-500 text-base">0</span>
+                    </div>
+                    <button onclick="exitGameCatcher()" class="bg-red-100 hover:bg-red-200 text-red-600 px-3 py-1 rounded-full font-bold text-xs border border-red-300">
+                        Keluar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Game Instructions Overlay / Start PopUp -->
+            <div id="catcher-start-screen" class="absolute inset-0 bg-sky-900/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-white p-6">
+                <div class="text-center max-w-md bg-white text-slate-800 p-6 rounded-3xl border-4 border-yellow-400 shadow-2xl">
+                    <div class="text-5xl mb-3">🧺☀️🍎💧</div>
+                    <h3 class="text-2xl font-bold text-sky-600 mb-2">Ayo Tangkap Energi!</h3>
+                    <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                        Gunakan <strong class="text-amber-600">Tombol Kiri & Kanan</strong> di layar (atau tombol panah keyboard) untuk menggerakkan keranjang kerangmu. <br>
+                        <strong class="text-green-600">Tangkap:</strong> Energi Baik (Matahari, Apel, Air, Kilat). <br>
+                        <strong class="text-red-500">Hindari:</strong> Pemborosan (Awan Asap Hitam, Lampu Nyala Siang)!
+                    </p>
+                    <button onclick="startGameCatcherActive()" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold text-lg px-8 py-3 rounded-full shadow-lg border-b-4 border-amber-700 hover:scale-105 transition-all">
+                        Mulai Main! 🚀
+                    </button>
+                </div>
+            </div>
+
+            <!-- Game Canvas Play Area Container -->
+            <div class="relative bg-gradient-to-b from-sky-300 to-emerald-200 rounded-2xl h-[340px] border-2 border-white overflow-hidden shadow-inner" id="catcher-game-box">
+                <!-- Falling items container dynamically populated -->
+                <div id="catcher-items-container" class="absolute inset-0 pointer-events-none"></div>
+
+                <!-- Catcher Basket (Basket Player) -->
+                <div id="catcher-basket" class="absolute bottom-2 left-[50%] -translate-x-1/2 w-16 h-12 bg-amber-600 border-2 border-amber-800 rounded-b-2xl rounded-t-lg shadow-md flex items-center justify-center text-2xl transition-all duration-75">
+                    🧺
+                </div>
+            </div>
+
+            <!-- Controls (Touch Buttons) -->
+            <div class="flex justify-between items-center mt-4 px-4 gap-4">
+                <button id="btn-move-left" class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-4 rounded-2xl shadow-md border-b-4 border-sky-700 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-left text-xl"></i> Gerak Kiri
+                </button>
+                <div class="text-center px-4">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase leading-none">Petunjuk</p>
+                    <span class="text-xs text-slate-600 font-medium">Bisa pakai keyboard Panah Kiri & Kanan</span>
+                </div>
+                <button id="btn-move-right" class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-4 rounded-2xl shadow-md border-b-4 border-sky-700 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    Gerak Kanan <i class="fa-solid fa-arrow-right text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: GAME 2 - MATCHING (PASANG HUBUNGAN) -->
+        <div id="screen-game-matching" class="screen-view hidden bg-white/95 rounded-3xl p-6 shadow-xl border-4 border-purple-300 max-w-4xl mx-auto w-full">
+            <div class="flex justify-between items-center border-b-2 border-purple-100 pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-puzzle-piece text-purple-500 text-2xl"></i>
+                    <h2 class="text-2xl font-bold text-slate-800">Gim: Pasangkan Sumber Energi</h2>
+                </div>
+                <button onclick="showScreen('home')" class="bg-red-100 hover:bg-red-200 text-red-600 px-4 py-1.5 rounded-full font-bold text-sm border border-red-300 transition-colors">
+                    Menu Utama
+                </button>
+            </div>
+
+            <!-- Game Instructions -->
+            <div class="bg-purple-50 p-3 rounded-2xl border border-purple-100 text-center mb-6">
+                <p class="text-purple-900 font-medium">
+                    👉 <strong>Cara Bermain:</strong> Ketuk satu <strong class="text-purple-600">Sumber Energi</strong> di sebelah kiri, lalu ketuk <strong class="text-emerald-600">Manfaat yang Cocok</strong> di sebelah kanan!
+                </p>
+            </div>
+
+            <!-- Matching Grid Play Area -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center justify-center">
+                <!-- Left Column: Source Cards -->
+                <div class="space-y-3 flex flex-col justify-center">
+                    <h3 class="text-center font-bold text-purple-800 bg-purple-100 py-1 rounded-full text-sm mb-1 uppercase tracking-wider">Sumber Energi</h3>
+                    <div id="matching-sources" class="space-y-3">
+                        <!-- Instantiated Dynamically -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Target/Benefit Cards -->
+                <div class="space-y-3 flex flex-col justify-center">
+                    <h3 class="text-center font-bold text-emerald-800 bg-emerald-100 py-1 rounded-full text-sm mb-1 uppercase tracking-wider">Kegunaan & Manfaat</h3>
+                    <div id="matching-targets" class="space-y-3">
+                        <!-- Instantiated Dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Bottom Progress Bar & Button -->
+            <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="text-sm font-semibold text-slate-600">
+                    Selesai: <span id="matching-progress-text" class="text-purple-600 font-bold">0 dari 4</span> dipasangkan
+                </div>
+                <button id="btn-reset-matching" onclick="resetMatchingGame()" class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold px-5 py-2 rounded-xl text-sm border border-purple-300 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> Mulai Ulang
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 5: GAME 3 - QUIZ (KUIS PINTAR DETEKTIF ENERGI) -->
+        <div id="screen-quiz" class="screen-view hidden bg-white rounded-3xl p-6 shadow-xl border-4 border-sky-300 max-w-2xl mx-auto w-full">
+            <div class="flex justify-between items-center border-b-2 border-sky-100 pb-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap text-sky-500 text-2xl"></i>
+                    <h2 class="text-2xl font-bold text-slate-800">Detektif Energi Kuis</h2>
+                </div>
+                <button onclick="showScreen('home')" class="bg-red-100 hover:bg-red-200 text-red-600 px-4 py-1.5 rounded-full font-bold text-xs border border-red-300">
+                    Menu Utama
+                </button>
+            </div>
+
+            <!-- Quiz Progress Bar -->
+            <div class="mb-4">
+                <div class="flex justify-between text-xs font-bold text-sky-700 mb-1">
+                    <span id="quiz-question-number">Pertanyaan 1 dari 5</span>
+                    <span id="quiz-score-indicator">Nilai: 0</span>
+                </div>
+                <div class="w-full bg-sky-100 rounded-full h-3.5 border border-sky-200">
+                    <div id="quiz-progress-fill" class="bg-gradient-to-r from-sky-400 to-blue-500 h-full rounded-full transition-all duration-300" style="width: 20%"></div>
+                </div>
+            </div>
+
+            <!-- Question and Option Card -->
+            <div class="bg-sky-50 rounded-2xl p-5 border border-sky-100 mb-6">
+                <!-- Question Title -->
+                <p id="quiz-question-text" class="text-lg font-bold text-slate-800 mb-4">
+                    Memuat pertanyaan...
+                </p>
+                <!-- Question Options -->
+                <div id="quiz-options-container" class="space-y-3">
+                    <!-- Dynamic option buttons inserted here -->
+                </div>
+            </div>
+
+            <!-- Mascot Feedback Area -->
+            <div id="quiz-feedback-box" class="hidden flex items-start gap-4 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl mb-4 transition-all">
+                <span id="quiz-feedback-emoji" class="text-3xl">🎉</span>
+                <div>
+                    <h5 id="quiz-feedback-title" class="font-bold text-emerald-800 text-sm">Hebat, Jawabanmu Benar!</h5>
+                    <p id="quiz-feedback-desc" class="text-xs text-emerald-600">Penjelasan seru tentang energi di sini.</p>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-end">
+                <button id="btn-quiz-next" onclick="nextQuizQuestion()" class="hidden bg-sky-500 hover:bg-sky-600 text-white font-bold px-6 py-2.5 rounded-xl shadow border-b-4 border-sky-700 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+                    Lanjut <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 6: REWARD & CERTIFICATE SECTION -->
+        <div id="screen-certificate" class="screen-view hidden bg-slate-100 rounded-3xl p-6 shadow-xl border-4 border-amber-300 max-w-3xl mx-auto w-full relative overflow-hidden">
+            <!-- Decorative Background Confetti Element -->
+            <div id="cert-confetti-bg" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-extrabold text-amber-500 drop-shadow-sm">🎉 SELAMAT! 🎉</h2>
+                <p class="text-slate-600 font-medium">Kamu berhasil menyelesaikan seluruh tantangan Sumber Energi!</p>
+            </div>
+
+            <!-- Certificate Mockup Visual -->
+            <div class="bg-white border-8 border-amber-400 rounded-2xl p-6 md:p-10 shadow-lg relative max-w-2xl mx-auto text-center" id="certificate-print-area">
+                <!-- Cute borders inside -->
+                <div class="border-4 border-double border-amber-200 p-6 md:p-8 flex flex-col items-center">
+                    
+                    <!-- Certificate Badge Header -->
+                    <div class="w-20 h-20 bg-amber-100 rounded-full border-4 border-amber-400 flex items-center justify-center shadow-md mb-4 pulse-energy">
+                        <i class="fa-solid fa-award text-amber-500 text-4xl"></i>
+                    </div>
+
+                    <h3 class="text-xl md:text-3xl font-bold text-slate-800 tracking-wide uppercase">Sertifikat Kelulusan</h3>
+                    <p class="text-xs md:text-sm text-slate-500 font-semibold tracking-wider uppercase mt-1">Diberikan Kepada Siswa Berprestasi:</p>
+                    
+                    <!-- Input name for personalization -->
+                    <div class="my-4 w-full max-w-md">
+                        <input type="text" id="student-name-input" oninput="syncCertificateToProfile()" class="w-full text-center text-xl md:text-2xl font-bold text-sky-600 border-b-2 border-dashed border-sky-400 focus:outline-none focus:border-sky-600 py-1 bg-transparent placeholder-slate-400" placeholder="Tulis Namamu di Sini!">
+                        <p class="text-[11px] text-slate-500 mt-2 font-bold">
+                            Kelas: <span id="cert-student-class" class="text-purple-600">3</span> | Sekolah: <span id="cert-student-school" class="text-indigo-600">SD Nusantara</span>
+                        </p>
+                        <p class="text-[10px] text-slate-400 mt-1 italic">Teks di atas dapat disesuaikan langsung!</p>
+                    </div>
+
+                    <p class="text-sm md:text-base text-slate-600 max-w-md mx-auto leading-relaxed">
+                        Telah diakui secara resmi sebagai <br>
+                        <strong class="text-amber-500 text-lg md:text-xl">🛡️ PAHLAWAN ENERGI CILIK 🛡️</strong> <br>
+                        karena telah menguasai pengetahuan sumber energi alami bumi, hemat listrik, serta menjaga kelestarian lingkungan.
+                    </p>
+
+                    <div class="mt-8 flex justify-between items-center w-full max-w-lg border-t border-slate-100 pt-4 text-xs md:text-sm text-slate-500">
+                        <div>
+                            <p class="font-bold">Eno si Robot</p>
+                            <p class="text-slate-400">Guru Pembimbing</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <!-- Star stamps representing perfect score -->
+                            <div class="flex gap-1 text-amber-400">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="font-bold text-slate-600 mt-1">Nilai Sempurna</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificate Actions -->
+            <div class="mt-6 flex flex-wrap justify-center gap-4">
+                <button onclick="window.print()" class="bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold px-6 py-2.5 rounded-xl shadow border-b-4 border-amber-700 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> Cetak / Simpan PDF
+                </button>
+                <button onclick="showScreen('home')" class="bg-sky-500 hover:bg-sky-600 text-white font-bold px-6 py-2.5 rounded-xl shadow border-b-4 border-sky-700 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> Main Lagi
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FLOATING MASCOT TUTORIAL POPUP (GLOBAL ASSISTANT) -->
+    <div id="mascot-bubble-widget" class="fixed bottom-4 right-4 z-40 max-w-xs md:max-w-sm flex items-end gap-2 transition-all duration-300 transform translate-y-0">
+        <!-- Text Bubble -->
+        <div class="bg-white rounded-2xl p-3 shadow-lg border-2 border-sky-200 text-xs md:text-sm text-slate-700 relative mb-4">
+            <button onclick="closeGlobalMascotBubble()" class="absolute -top-1 -right-1 w-5 h-5 bg-slate-200 hover:bg-slate-300 rounded-full flex items-center justify-center text-slate-600">
+                <i class="fa-solid fa-xmark text-[9px]"></i>
+            </button>
+            <p id="global-mascot-text">Pilih menu di atas untuk memulai petualangan belajarmu!</p>
+        </div>
+        <!-- Little Mascot Image -->
+        <div class="w-14 h-14 bg-sky-500 rounded-2xl shadow-lg border-2 border-white flex items-center justify-center cursor-pointer float-mascot shrink-0 hover:scale-110 transition-transform" onclick="triggerMascotClickVoice()">
+            <svg class="w-10 h-10" viewBox="0 0 120 120">
+                <rect x="57" y="10" width="6" height="20" rx="3" fill="#ffffff" />
+                <circle cx="60" cy="10" r="8" fill="#fbbf24" />
+                <rect x="30" y="25" width="60" height="50" rx="15" fill="#38bdf8" />
+                <rect x="42" y="37" width="36" height="18" rx="6" fill="#0f172a" />
+                <circle cx="50" cy="46" r="4" fill="#22c55e" />
+                <circle cx="70" cy="46" r="4" fill="#22c55e" />
+                <rect x="40" y="75" width="40" height="30" rx="8" fill="#38bdf8" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Footer Credit -->
+    <footer class="bg-slate-800 text-slate-400 text-center py-4 text-xs mt-8">
+        <p>© 2026 Petualangan Energi Cilik - Gim Edukasi Interaktif IPA SD Kelas 3.</p>
+        <p class="mt-1">Dibuat khusus untuk kenyamanan belajar mandiri interaktif.</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC SECTION -->
+    <script>
+        // Game State Variables
+        let state = {
+            stars: 0,
+            soundEnabled: true,
+            activeScreen: 'home',
+            
+            // Student Profile Identity State
+            profile: {
+                name: 'Siswa Kelas 3 SD Hebat',
+                class: '3',
+                school: 'SD Nusantara',
+                avatar: '🤖'
+            },
+
+            // Learning Topic interaction tracking
+            interactedTopics: {
+                matahari: false,
+                air: false,
+                angin: false,
+                makanan: false,
+                listrik: false
+            },
+
+            // Game Catcher active status
+            catcher: {
+                score: 0,
+                playerX: 50, // in percentage
+                items: [],
+                loopId: null,
+                spawnId: null,
+                difficulty: 1
+            },
+
+            // Game Matching active status
+            matching: {
+                selectedSource: null,
+                selectedTarget: null,
+                pairsMatched: 0,
+                connectedPairs: [] // list of source indices paired
+            },
+
+            // Quiz tracking
+            quiz: {
+                currentIndex: 0,
+                score: 0,
+                isAnswered: false
+            }
+        };
+
+        // Synthesizer setup for cute bleep-bloop sounds
+        let synth;
+        let bgMusic;
+        let musicStarted = false;
+
+        try {
+            synth = new Tone.Synth().toDestination();
+            synth.volume.value = -6; // safe initial volume
+        } catch(e) {
+            console.warn("Tone.js failed to initialize sound", e);
+        }
+
+        // Memuat musik latar dari tautan yang diberikan pengguna
+        try {
+            bgMusic = new Audio('https://github.com/mariamagdalena32764-sys/musik-gim/raw/refs/heads/main/Favorite_Son_of_the_Vent.mp3');
+            bgMusic.loop = true;
+            bgMusic.volume = 0.25; // Volume latar belakang yang nyaman dan lembut
+        } catch (e) {
+            console.warn("Gagal memuat musik latar belakang:", e);
+        }
+
+        // Fungsi untuk memulai musik pada interaksi pertama pengguna (menghindari blokir autoplay browser)
+        function startMusicOnFirstInteraction() {
+            if (!musicStarted && state.soundEnabled && bgMusic) {
+                bgMusic.play().then(() => {
+                    musicStarted = true;
+                    console.log("Musik latar berhasil diputar!");
+                }).catch(err => {
+                    console.log("Menunggu interaksi selanjutnya dari pengguna untuk memulai musik...", err);
+                });
+            }
+        }
+
+        // Daftarkan listener interaksi pertama di dokumen
+        document.addEventListener('click', startMusicOnFirstInteraction, { once: true });
+        document.addEventListener('touchstart', startMusicOnFirstInteraction, { once: true });
+
+        // Custom Sound Triggers
+        function playSound(type) {
+            if (!state.soundEnabled || !synth) return;
+            try {
+                // Ensure audio context is run
+                Tone.start();
+                if (type === 'click') {
+                    synth.triggerAttackRelease("C5", "8n");
+                } else if (type === 'success') {
+                    synth.triggerAttackRelease("E5", "16n");
+                    setTimeout(() => synth.triggerAttackRelease("G5", "8n"), 100);
+                } else if (type === 'fail') {
+                    synth.triggerAttackRelease("A3", "8n");
+                } else if (type === 'level-up') {
+                    synth.triggerAttackRelease("C5", "16n");
+                    setTimeout(() => synth.triggerAttackRelease("E5", "16n"), 100);
+                    setTimeout(() => synth.triggerAttackRelease("G5", "16n"), 200);
+                    setTimeout(() => synth.triggerAttackRelease("C6", "4n"), 300);
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function toggleMute() {
+            state.soundEnabled = !state.soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (state.soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                playSound('click');
+                if (bgMusic) {
+                    bgMusic.play().catch(e => console.log("Menunggu interaksi pengguna untuk melanjutkan musik"));
+                }
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                if (bgMusic) {
+                    bgMusic.pause();
+                }
+            }
+        }
+
+        // Add visual stars to player profile
+        function addStars(num) {
+            state.stars += num;
+            document.getElementById('star-count').innerText = state.stars;
+            playSound('success');
+            
+            // Sapa siswa dengan namanya secara interaktif
+            const firstName = state.profile.name.split(' ')[0] || "Teman";
+            triggerMascotSpeech(`Hebat, ${firstName}! Kamu baru saja mendapatkan +${num} bintang! 🌟`);
+        }
+
+        // Functions to Handle Student Profile / Identity
+        function selectAvatar(avatarChar) {
+            playSound('click');
+            state.profile.avatar = avatarChar;
+            
+            // Update Active Class Styles
+            document.querySelectorAll('.avatar-option').forEach(btn => {
+                btn.classList.remove('avatar-active');
+            });
+            const activeBtn = document.getElementById(`avatar-${avatarChar}`);
+            if (activeBtn) activeBtn.classList.add('avatar-active');
+
+            saveStudentIdentity();
+            triggerMascotSpeech(`Wah, pilihan yang keren! Sekarang kamu berpetualang sebagai avatar ${avatarChar}!`);
+        }
+
+        function saveStudentIdentity() {
+            const nameVal = document.getElementById('input-student-name').value.trim();
+            const classVal = document.getElementById('input-student-class').value.trim();
+            const schoolVal = document.getElementById('input-student-school').value.trim();
+
+            if (nameVal) state.profile.name = nameVal;
+            if (classVal) state.profile.class = classVal;
+            if (schoolVal) state.profile.school = schoolVal;
+
+            // Sync Header View
+            const headerBadge = document.getElementById('header-profile-badge');
+            if (nameVal || schoolVal) {
+                headerBadge.classList.remove('hidden');
+                headerBadge.classList.add('flex');
+            }
+            document.getElementById('header-avatar').innerText = state.profile.avatar;
+            document.getElementById('header-student-name').innerText = state.profile.name;
+            document.getElementById('header-student-school').innerText = state.profile.school;
+
+            // Pre-fill Certificate Input & Text
+            document.getElementById('student-name-input').value = state.profile.name;
+            document.getElementById('cert-student-class').innerText = state.profile.class;
+            document.getElementById('cert-student-school').innerText = state.profile.school;
+        }
+
+        function syncCertificateToProfile() {
+            const certNameInput = document.getElementById('student-name-input').value.trim();
+            if (certNameInput) {
+                state.profile.name = certNameInput;
+                document.getElementById('input-student-name').value = certNameInput;
+                document.getElementById('header-student-name').innerText = certNameInput;
+            }
+        }
+
+        // Screen switching core logic
+        function showScreen(screenId) {
+            playSound('click');
+            
+            // Clean up any ongoing gameloops/spawners from Catcher Game
+            if (screenId !== 'game-catcher') {
+                stopCatcherGame();
+            }
+
+            document.querySelectorAll('.screen-view').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`screen-${screenId}`).classList.remove('hidden');
+            state.activeScreen = screenId;
+
+            const studentFirstName = state.profile.name.split(' ')[0] || "Pahlawan";
+
+            // Tailor the mascot speech when changing screens
+            switch (screenId) {
+                case 'home':
+                    triggerMascotSpeech(`Halo ${studentFirstName}! Kembali ke Beranda. Yuk pilih petualangan belajar yang seru!`);
+                    break;
+                case 'belajar':
+                    triggerMascotSpeech(`Buku Belajar Terbuka! Klik tombol hijau sebelah kiri untuk mempelajari materi sumber energi.`);
+                    loadTopic('matahari');
+                    break;
+                case 'game-catcher':
+                    triggerMascotSpeech(`Ayo tangkap energi alam! Gerakkan keranjang menggunakan tombol di bawah.`);
+                    break;
+                case 'game-matching':
+                    triggerMascotSpeech(`Asah otakmu, ${studentFirstName}! Pasangkan kepingan kiri dan kanan agar energinya bersatu.`);
+                    resetMatchingGame();
+                    break;
+                case 'quiz':
+                    triggerMascotSpeech(`Waktunya ujian Detektif! Pilih jawaban yang menurutmu paling tepat ya.`);
+                    initQuiz();
+                    break;
+                case 'certificate':
+                    triggerMascotSpeech(`WOW! Kamu luar biasa, ${studentFirstName}! Silakan tulis namamu pada sertifikat pahlawanmu!`);
+                    generateConfetti();
+                    break;
+            }
+        }
+
+        // Custom Mascot speech bubble generator
+        function triggerMascotSpeech(text) {
+            const bubble = document.getElementById('mascot-bubble-widget');
+            const bubbleText = document.getElementById('global-mascot-text');
+            bubbleText.innerHTML = text;
+            bubble.classList.remove('translate-y-12', 'opacity-50');
+        }
+
+        function closeGlobalMascotBubble() {
+            const bubble = document.getElementById('mascot-bubble-widget');
+            bubble.classList.add('translate-y-12', 'opacity-50');
+        }
+
+        function triggerMascotClickVoice() {
+            playSound('success');
+            const phrases = [
+                "Apakah kamu tahu? Matahari adalah sumber energi terbesar di jagat raya bumi!",
+                "Hemat energi, hemat biaya. Matikan lampu di siang hari ya!",
+                "Tubuh kita butuh makan agar punya energi untuk belajar dan bermain bola!",
+                "Angin sepoi-sepoi juga bisa diubah jadi energi listrik dengan kincir besar!"
+            ];
+            const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+            triggerMascotSpeech(randomPhrase);
+        }
+
+        
+        // Topic Data Object
+        const topicsData = {
+            matahari: {
+                title: "☀️ Matahari (Raja Energi)",
+                emoji: "☀️",
+                desc: "Matahari adalah <strong>sumber energi terbesar</strong> di Bumi! Matahari memancarkan energi <strong>Panas</strong> dan energi <strong>Cahaya</strong> yang tidak pernah habis.",
+                benefits: [
+                    "🌱 <strong>Membantu Tumbuhan:</strong> Tumbuhan butuh cahaya matahari untuk memasak makanan (fotosintesis).",
+                    "👕 <strong>Menjemur Pakaian:</strong> Panas matahari membuat air di pakaian menguap dan jadi kering.",
+                    "🔌 <strong>Pembangkit Listrik:</strong> Panel surya menangkap cahaya matahari dan mengubahnya jadi listrik rumah!"
+                ],
+                bonusText: "Matahari selalu menyinari bumi setiap hari secara gratis!",
+                actionSuccess: "Panas matahari menghangatkan harimu! Kamu dapat 2 Bintang hangat! ☀️"
+            },
+            air: {
+                title: "💧 Air Mengalir (Energi Gerak)",
+                emoji: "💧",
+                desc: "Air mengalir menyimpan energi gerak yang melimpah. Air yang mengalir deras bisa memutar kincir air atau turbin raksasa.",
+                benefits: [
+                    "🌊 <strong>Mengalir ke Sawah:</strong> Air membantu petani menyirami ladang padi.",
+                    "💡 <strong>PLTA:</strong> Pembangkit Listrik Tenaga Air memanfaatkan air terjun/waduk untuk menyalakan ribuan lampu kota!",
+                    "⛵ <strong>Transportasi:</strong> Membantu perahu berlayar mengarungi sungai besar."
+                ],
+                bonusText: "Selalu jaga kebersihan sungai kita ya agar airnya jernih!",
+                actionSuccess: "Wusss! Aliran air memutar kincir dengan kencang! Kamu dapat 2 Bintang segar! 💧"
+            },
+            angin: {
+                title: "💨 Angin (Hembusan Hebat)",
+                emoji: "💨",
+                desc: "Angin adalah udara yang bergerak. Sejak zaman dahulu, angin membantu manusia beraktivitas secara alami dan ramah lingkungan.",
+                benefits: [
+                    "⛵ <strong>Mendorong Perahu Layar:</strong> Membantu nelayan pulang-pergi melaut tanpa bensin.",
+                    "🪁 <strong>Menerbangkan Layang-layang:</strong> Angin sore yang pas membuat layang-layang terbang tinggi.",
+                    "🌀 <strong>PLTB:</strong> Kincir angin raksasa berputar kencang menghasilkan listrik ramah lingkungan."
+                ],
+                bonusText: "Angin sejuk membuat cuaca panas menjadi lebih nyaman!",
+                actionSuccess: "Sreeet! Angin menerbangkan layanganmu tinggi sekali! Kamu dapat 2 Bintang sejuk! 💨"
+            },
+            makanan: {
+                title: "🍎 Makanan (Bahan Bakar Tubuh)",
+                emoji: "🍎",
+                desc: "Manusia dan hewan butuh makanan sebagai <strong>sumber energi utama</strong> tubuh. Tanpa makan, tubuh kita akan lemas seperti mobil kehabisan bensin.",
+                benefits: [
+                    "🏃 <strong>Bermain & Berlari:</strong> Energi makanan membuat otot kita kuat beraktivitas.",
+                    "🧠 <strong>Belajar Pintar:</strong> Otak kita butuh asupan energi makanan sehat agar mudah mengerti pelajaran.",
+                    "🌱 <strong>Tumbuh Tinggi:</strong> Makanan bergizi seimbang membantu tubuhmu cepat bertambah tinggi."
+                ],
+                bonusText: "Jangan lupa sarapan pagi sebelum berangkat sekolah ya!",
+                actionSuccess: "Nyam-nyam! Tubuhmu langsung penuh tenaga dan semangat belajar! Kamu dapat 2 Bintang sehat! 🍎"
+            },
+            listrik: {
+                title: "⚡ Energi Listrik (Sahabat Rumah)",
+                emoji: "⚡",
+                desc: "Listrik adalah sumber energi buatan manusia yang paling serbaguna. Energi listrik dialirkan melalui kabel ke seluruh rumah kita.",
+                benefits: [
+                    "📺 <strong>Menyalakan Elektronik:</strong> Televisi, kulkas, blender, dan komputer butuh listrik untuk hidup.",
+                    "💡 <strong>Penerangan Malam:</strong> Lampu bohlam mengubah listrik jadi cahaya agar malam hari jadi terang.",
+                    "📱 <strong>Mengisi Baterai:</strong> Ponsel pintar atau tablet mainanmu dicharge memakai daya listrik."
+                ],
+                bonusText: "Ingat: Matikan kipas angin atau TV jika tidak digunakan agar hemat energi!",
+                actionSuccess: "Klik! Lampu menyala menerangi kamarmu. Hemat listrik selalu ya! Kamu dapat 2 Bintang pintar! ⚡"
+            }
+        };
+
+        // Active Topic Tracker
+        let currentTopicId = 'matahari';
+
+        function startBelajar() {
+            showScreen('belajar');
+        }
+
+        // Dynamic Loading of Topic Content
+        function loadTopic(topicId) {
+            playSound('click');
+            currentTopicId = topicId;
+
+            // Highlight the active tab
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn w-full text-left p-3 rounded-xl font-bold transition-all flex items-center gap-3 text-emerald-700 hover:bg-emerald-100";
+            });
+            document.getElementById(`tab-${topicId}`).className = "tab-btn w-full text-left p-3 rounded-xl font-bold transition-all flex items-center gap-3 bg-emerald-500 text-white shadow-md";
+
+            const data = topicsData[topicId];
+            
+            // Build visual Benefits list
+            let benefitsListHtml = '';
+            data.benefits.forEach(b => {
+                benefitsListHtml += `<li class="flex items-start gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100 shadow-sm text-sm">
+                    <span class="text-emerald-500">✨</span>
+                    <span>${b}</span>
+                </li>`;
+            });
+
+            // Populate the Content area
+            document.getElementById('learning-content').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-4xl bg-yellow-100 p-2 rounded-2xl border-2 border-yellow-200">${data.emoji}</span>
+                    <h3 class="text-2xl font-bold text-slate-800">${data.title}</h3>
+                </div>
+                <p class="text-slate-600 leading-relaxed text-base">${data.desc}</p>
+                <div class="mt-4">
+                    <h5 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Manfaat Utama:</h5>
+                    <ul class="space-y-2">
+                        ${benefitsListHtml}
+                    </ul>
+                </div>
+                <p class="text-xs italic text-slate-400 border-l-2 border-emerald-400 pl-2 mt-2">💡 Info Menarik: ${data.bonusText}</p>
+            `;
+
+            // Setup bottom interaction button
+            document.getElementById('topic-animation').innerText = data.emoji;
+            document.getElementById('interact-title').innerText = `Aktivasi Energi ${topicId.toUpperCase()}`;
+            
+            if (state.interactedTopics[topicId]) {
+                document.getElementById('interact-subtitle').innerText = "Sudah diaktivasi! (+2 Bintang telah diraih)";
+                document.getElementById('btn-interact').disabled = true;
+                document.getElementById('btn-interact').classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('btn-interact').innerText = "Sudah Aktif! ✅";
+            } else {
+                document.getElementById('interact-subtitle').innerText = "Ketuk untuk mengaktifkan aliran energi!";
+                document.getElementById('btn-interact').disabled = false;
+                document.getElementById('btn-interact').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('btn-interact').innerText = "Aktifkan! 🚀";
+            }
+        }
+
+        // Click to Interact inside learning block
+        function interactTopic() {
+            if (state.interactedTopics[currentTopicId]) return;
+
+            state.interactedTopics[currentTopicId] = true;
+            addStars(2);
+
+            // Re-load to update button status
+            loadTopic(currentTopicId);
+
+            // Mascot speaks congrats
+            triggerMascotSpeech(topicsData[currentTopicId].actionSuccess);
+        }
+
+
+        
+        // Items definition for game
+        const catchableItems = [
+            { emoji: '☀️', type: 'good', name: 'Matahari', score: 10, speed: 2.5 },
+            { emoji: '🍎', type: 'good', name: 'Apel Lezat', score: 10, speed: 2.5 },
+            { emoji: '💧', type: 'good', name: 'Air Segar', score: 10, speed: 3.0 },
+            { emoji: '⚡', type: 'good', name: 'Kilat Listrik', score: 15, speed: 3.5 },
+            { emoji: '💨', type: 'good', name: 'Kincir Angin', score: 10, speed: 2.8 },
+            { emoji: '💨', type: 'good', name: 'Angin Sejuk', score: 10, speed: 2.8 },
+            
+            // Dangerous/Bad items
+            { emoji: '💨', type: 'bad', name: 'Polusi Asap', score: -10, speed: 3.0, css: 'filter grayscale opacity-60' }, // customized wind emoji
+            { emoji: '🌫️', type: 'bad', name: 'Kabut Asap Batu Bara', score: -10, speed: 2.8 },
+            { emoji: '💡', type: 'bad', name: 'Lampu Boros Siang Hari', score: -15, speed: 3.2 }
+        ];
+
+        function startGameCatcher() {
+            showScreen('game-catcher');
+            document.getElementById('catcher-start-screen').classList.remove('hidden');
+        }
+
+        function exitGameCatcher() {
+            stopCatcherGame();
+            showScreen('home');
+        }
+
+        function startGameCatcherActive() {
+            // Hide Overlay
+            document.getElementById('catcher-start-screen').classList.add('hidden');
+            
+            // Reset local states
+            state.catcher.score = 0;
+            state.catcher.items = [];
+            state.catcher.playerX = 50;
+            document.getElementById('catcher-score').innerText = state.catcher.score;
+            document.getElementById('catcher-items-container').innerHTML = '';
+            
+            // Start loops
+            state.catcher.loopId = requestAnimationFrame(gameCatcherLoop);
+            
+            // Spawner
+            state.catcher.spawnId = setInterval(() => {
+                spawnCatcherItem();
+            }, 1200);
+
+            playSound('click');
+            triggerMascotSpeech("Gim Dimulai! Gerakkan keranjangmu ke kiri dan kanan untuk bersenang-senang!");
+        }
+
+        function spawnCatcherItem() {
+            const container = document.getElementById('catcher-game-box');
+            if (!container) return;
+
+            const boxWidth = container.clientWidth;
+            // Select random item from list
+            const baseItem = catchableItems[Math.floor(Math.random() * catchableItems.length)];
+            
+            // Generate unique coordinate
+            const posX = Math.random() * (boxWidth - 40); // safety boundary
+
+            const itemEl = document.createElement('div');
+            itemEl.className = `absolute text-3xl select-none flex items-center justify-center transition-all ${baseItem.css || ''}`;
+            itemEl.style.left = `${posX}px`;
+            itemEl.style.top = `-40px`;
+            itemEl.innerText = baseItem.emoji;
+
+            // Handle bad items visual clue
+            if (baseItem.type === 'bad') {
+                itemEl.classList.add('border-2', 'border-dashed', 'border-red-400', 'bg-red-50/50', 'rounded-full', 'w-10', 'h-10');
+            }
+
+            document.getElementById('catcher-items-container').appendChild(itemEl);
+
+            state.catcher.items.push({
+                element: itemEl,
+                x: posX,
+                y: -40,
+                type: baseItem.type,
+                score: baseItem.score,
+                speed: baseItem.speed + (Math.random() * 0.8), // subtle variance
+                width: 40
+            });
+        }
+
+        // Touch Navigation Handlers
+        const btnLeft = document.getElementById('btn-move-left');
+        const btnRight = document.getElementById('btn-move-right');
+
+        let isMovingLeft = false;
+        let isMovingRight = false;
+
+        btnLeft.addEventListener('mousedown', () => isMovingLeft = true);
+        btnLeft.addEventListener('mouseup', () => isMovingLeft = false);
+        btnLeft.addEventListener('mouseleave', () => isMovingLeft = false);
+        btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); isMovingLeft = true; });
+        btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); isMovingLeft = false; });
+
+        btnRight.addEventListener('mousedown', () => isMovingRight = true);
+        btnRight.addEventListener('mouseup', () => isMovingRight = false);
+        btnRight.addEventListener('mouseleave', () => isMovingRight = false);
+        btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); isMovingRight = true; });
+        btnRight.addEventListener('touchend', (e) => { e.preventDefault(); isMovingRight = false; });
+
+        // Keyboard inputs
+        window.addEventListener('keydown', (e) => {
+            if (state.activeScreen !== 'game-catcher') return;
+            if (e.key === 'ArrowLeft') isMovingLeft = true;
+            if (e.key === 'ArrowRight') isMovingRight = true;
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft') isMovingLeft = false;
+            if (e.key === 'ArrowRight') isMovingRight = false;
+        });
+
+        function gameCatcherLoop() {
+            if (state.activeScreen !== 'game-catcher') return;
+
+            const basket = document.getElementById('catcher-basket');
+            const container = document.getElementById('catcher-game-box');
+            if (!container || !basket) return;
+
+            const boxWidth = container.clientWidth;
+            const step = 4; // basket movement step in percentage
+
+            // Move Basket
+            if (isMovingLeft) {
+                state.catcher.playerX = Math.max(5, state.catcher.playerX - 1.5);
+            }
+            if (isMovingRight) {
+                state.catcher.playerX = Math.min(95, state.catcher.playerX + 1.5);
+            }
+
+            basket.style.left = `${state.catcher.playerX}%`;
+
+            // Calculate basket bounding box in absolute pixel coords
+            const basketRect = basket.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            const bLeft = basketRect.left - containerRect.left;
+            const bRight = basketRect.right - containerRect.left;
+            const bTop = containerRect.height - 48; // basket height
+            const bBottom = containerRect.height;
+
+            // Process Falling Items
+            for (let i = state.catcher.items.length - 1; i >= 0; i--) {
+                const item = state.catcher.items[i];
+                item.y += item.speed;
+                item.element.style.top = `${item.y}px`;
+
+                // Check out of bounds (ground hit)
+                if (item.y > containerRect.height) {
+                    item.element.remove();
+                    state.catcher.items.splice(i, 1);
+                    continue;
+                }
+
+                // Check Collision with Basket
+                const itemRight = item.x + item.width;
+                const itemBottom = item.y + item.width;
+
+                if (itemBottom >= bTop && item.y <= bBottom && itemRight >= bLeft && item.x <= bRight) {
+                    // Collision caught!
+                    if (item.type === 'good') {
+                        state.catcher.score += item.score;
+                        playSound('success');
+                        createCatchSparkle(item.x, item.y, '✨');
+                    } else {
+                        state.catcher.score = Math.max(0, state.catcher.score + item.score);
+                        playSound('fail');
+                        createCatchSparkle(item.x, item.y, '💥');
+                        triggerMascotSpeech("Aduh! Hindari benda-benda yang membuang energi / polusi ya!");
+                    }
+
+                    document.getElementById('catcher-score').innerText = state.catcher.score;
+                    
+                    // Award star bonus when score milestones hit
+                    if (state.catcher.score >= 100 && state.catcher.score % 100 === 0) {
+                        addStars(5);
+                    }
+
+                    // Remove item
+                    item.element.remove();
+                    state.catcher.items.splice(i, 1);
+                }
+            }
+
+            // End game check or infinite play
+            if (state.catcher.score >= 150) {
+                stopCatcherGame();
+                addStars(10);
+                triggerMascotSpeech("Luar biasa! Kamu menyelesaikan tantangan Tangkap Energi dengan skor 150+! Kamu berhak atas 10 Bintang tambahan!");
+                showScreen('home');
+                return;
+            }
+
+            state.catcher.loopId = requestAnimationFrame(gameCatcherLoop);
+        }
+
+        // Particle explosion effect when catching item
+        function createCatchSparkle(x, y, char) {
+            const container = document.getElementById('catcher-game-box');
+            const sparkle = document.createElement('div');
+            sparkle.className = 'absolute text-xl pointer-events-none transition-all duration-300 transform scale-150';
+            sparkle.style.left = `${x}px`;
+            sparkle.style.top = `${y}px`;
+            sparkle.innerText = char;
+            container.appendChild(sparkle);
+
+            setTimeout(() => {
+                sparkle.style.transform = 'translateY(-20px) scale(0)';
+                sparkle.style.opacity = '0';
+                setTimeout(() => sparkle.remove(), 300);
+            }, 50);
+        }
+
+        function stopCatcherGame() {
+            if (state.catcher.loopId) {
+                cancelAnimationFrame(state.catcher.loopId);
+                state.catcher.loopId = null;
+            }
+            if (state.catcher.spawnId) {
+                clearInterval(state.catcher.spawnId);
+                state.catcher.spawnId = null;
+            }
+            state.catcher.items.forEach(it => it.element.remove());
+            state.catcher.items = [];
+        }
+
+
+        
+        // Matching game dataset
+        const matchingPairs = [
+            { id: 1, source: "☀️ Matahari Sehat", target: "👕 Mengeringkan Pakaian Basah" },
+            { id: 2, source: "💧 Air Mengalir", target: "💡 Memutar Turbin Pembangkit Listrik (PLTA)" },
+            { id: 3, source: "🍎 Makanan Sehat", target: "🏃 Berlari dan Bermain di Lapangan" },
+            { id: 4, source: "💨 Tiupan Angin", target: "🪁 Menerbangkan Layang-layang di Sore Hari" }
+        ];
+
+        function startGameMatching() {
+            showScreen('game-matching');
+        }
+
+        function resetMatchingGame() {
+            state.matching.selectedSource = null;
+            state.matching.selectedTarget = null;
+            state.matching.pairsMatched = 0;
+            state.matching.connectedPairs = [];
+
+            document.getElementById('matching-progress-text').innerText = `0 dari ${matchingPairs.length}`;
+            
+            // Randomly shuffle arrays independently to make it a challenge
+            const sourcesShuffled = [...matchingPairs].sort(() => Math.random() - 0.5);
+            const targetsShuffled = [...matchingPairs].sort(() => Math.random() - 0.5);
+
+            // Populate sources
+            const srcContainer = document.getElementById('matching-sources');
+            srcContainer.innerHTML = '';
+            sourcesShuffled.forEach(item => {
+                const btn = document.createElement('button');
+                btn.id = `match-src-${item.id}`;
+                btn.className = "w-full text-left p-4 bg-white hover:bg-purple-50 text-slate-800 font-bold rounded-2xl border-2 border-purple-200 shadow transition-all active:scale-95 flex justify-between items-center";
+                btn.innerHTML = `
+                    <span>${item.source}</span>
+                    <i class="fa-solid fa-circle text-xs text-purple-200"></i>
+                `;
+                btn.onclick = () => selectMatchingSource(item.id);
+                srcContainer.appendChild(btn);
+            });
+
+            // Populate targets
+            const tgtContainer = document.getElementById('matching-targets');
+            tgtContainer.innerHTML = '';
+            targetsShuffled.forEach(item => {
+                const btn = document.createElement('button');
+                btn.id = `match-tgt-${item.id}`;
+                btn.className = "w-full text-left p-4 bg-white hover:bg-emerald-50 text-slate-800 font-bold rounded-2xl border-2 border-emerald-200 shadow transition-all active:scale-95 flex justify-between items-center";
+                btn.innerHTML = `
+                    <span>${item.target}</span>
+                    <i class="fa-solid fa-circle text-xs text-emerald-200"></i>
+                `;
+                btn.onclick = () => selectMatchingTarget(item.id);
+                tgtContainer.appendChild(btn);
+            });
+
+            playSound('click');
+        }
+
+        function selectMatchingSource(id) {
+            // Check if already completed
+            if (state.matching.connectedPairs.includes(id)) return;
+
+            playSound('click');
+            state.matching.selectedSource = id;
+
+            // Highlight source buttons
+            matchingPairs.forEach(item => {
+                const el = document.getElementById(`match-src-${item.id}`);
+                if (el) {
+                    if (item.id === id) {
+                        el.className = "w-full text-left p-4 bg-purple-500 text-white font-bold rounded-2xl border-2 border-purple-600 shadow-md scale-102 flex justify-between items-center";
+                    } else if (state.matching.connectedPairs.includes(item.id)) {
+                        // Keep successfully matched styling
+                        el.className = "w-full text-left p-4 bg-emerald-100 text-emerald-800 font-bold rounded-2xl border-2 border-emerald-300 opacity-60 flex justify-between items-center pointer-events-none";
+                    } else {
+                        el.className = "w-full text-left p-4 bg-white text-slate-800 font-bold rounded-2xl border-2 border-purple-200 shadow flex justify-between items-center";
+                    }
+                }
+            });
+
+            checkMatchingAttempt();
+        }
+
+        function selectMatchingTarget(id) {
+            // Check if already completed
+            if (state.matching.connectedPairs.includes(id)) return;
+
+            playSound('click');
+            state.matching.selectedTarget = id;
+
+            // Highlight target buttons
+            matchingPairs.forEach(item => {
+                const el = document.getElementById(`match-tgt-${item.id}`);
+                if (el) {
+                    if (item.id === id) {
+                        el.className = "w-full text-left p-4 bg-emerald-500 text-white font-bold rounded-2xl border-2 border-emerald-600 shadow-md scale-102 flex justify-between items-center";
+                    } else if (state.matching.connectedPairs.includes(item.id)) {
+                        // Keep matched styling
+                        el.className = "w-full text-left p-4 bg-emerald-100 text-emerald-800 font-bold rounded-2xl border-2 border-emerald-300 opacity-60 flex justify-between items-center pointer-events-none";
+                    } else {
+                        el.className = "w-full text-left p-4 bg-white text-slate-800 font-bold rounded-2xl border-2 border-emerald-200 shadow flex justify-between items-center";
+                    }
+                }
+            });
+
+            checkMatchingAttempt();
+        }
+
+        function checkMatchingAttempt() {
+            if (state.matching.selectedSource !== null && state.matching.selectedTarget !== null) {
+                const sId = state.matching.selectedSource;
+                const tId = state.matching.selectedTarget;
+
+                if (sId === tId) {
+                    // SUCCESS MATCH!
+                    state.matching.connectedPairs.push(sId);
+                    state.matching.pairsMatched += 1;
+                    playSound('success');
+
+                    // Apply static success state
+                    const srcEl = document.getElementById(`match-src-${sId}`);
+                    const tgtEl = document.getElementById(`match-tgt-${tId}`);
+                    
+                    srcEl.className = "w-full text-left p-4 bg-emerald-100 text-emerald-800 font-bold rounded-2xl border-2 border-emerald-300 opacity-60 flex justify-between items-center pointer-events-none";
+                    srcEl.innerHTML = `<span>${srcEl.innerText}</span> <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>`;
+                    
+                    tgtEl.className = "w-full text-left p-4 bg-emerald-100 text-emerald-800 font-bold rounded-2xl border-2 border-emerald-300 opacity-60 flex justify-between items-center pointer-events-none";
+                    tgtEl.innerHTML = `<span>${tgtEl.innerText}</span> <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>`;
+
+                    // Update UI Progress Counter
+                    document.getElementById('matching-progress-text').innerText = `${state.matching.pairsMatched} dari ${matchingPairs.length}`;
+                    triggerMascotSpeech(`Benar sekali! Pasanganmu sangat tepat. +5 Bintang! ✨`);
+                    addStars(5);
+
+                    // Check win condition
+                    if (state.matching.pairsMatched === matchingPairs.length) {
+                        setTimeout(() => {
+                            playSound('level-up');
+                            triggerMascotSpeech("YAY! Kamu telah menyelesaikan permainan Pasangan Energi dengan sempurna! Sungguh Hebat!");
+                            addStars(10);
+                        }, 500);
+                    }
+                } else {
+                    // FAILED MATCH
+                    playSound('fail');
+                    triggerMascotSpeech("Aduh, kurang tepat kawan! Coba cari keterkaitan yang lebih pas.");
+                    
+                    // Shake effect on failed elements
+                    const srcEl = document.getElementById(`match-src-${sId}`);
+                    const tgtEl = document.getElementById(`match-tgt-${tId}`);
+                    srcEl.classList.add('animate-bounce');
+                    tgtEl.classList.add('animate-bounce');
+
+                    setTimeout(() => {
+                        srcEl.classList.remove('animate-bounce');
+                        tgtEl.classList.remove('animate-bounce');
+                        
+                        // Reset selection style
+                        srcEl.className = "w-full text-left p-4 bg-white text-slate-800 font-bold rounded-2xl border-2 border-purple-200 shadow flex justify-between items-center";
+                        tgtEl.className = "w-full text-left p-4 bg-white text-slate-800 font-bold rounded-2xl border-2 border-emerald-200 shadow flex justify-between items-center";
+                    }, 800);
+                }
+
+                // Clear selection states for next click
+                state.matching.selectedSource = null;
+                state.matching.selectedTarget = null;
+            }
+        }
+
+
+        
+        // Quiz Questions Data Base
+        const quizDatabase = [
+            {
+                question: "1. Apa sumber energi paling besar dan tidak pernah habis di Bumi kita?",
+                options: [
+                    { text: "A. Lilin kecil", correct: false },
+                    { text: "B. Lampu senter", correct: false },
+                    { text: "C. Matahari", correct: true },
+                    { text: "D. Baterai HP", correct: false }
+                ],
+                explain: "Matahari menghasilkan energi panas dan cahaya sangat besar yang menyinari bumi sepanjang waktu secara terus menerus!"
+            },
+            {
+                question: "2. Ketika kita selesai menjemur baju basah di luar rumah, pakaian kita menjadi kering karena bantuan energi...",
+                options: [
+                    { text: "A. Aliran Listrik", correct: false },
+                    { text: "B. Panas Matahari", correct: true },
+                    { text: "C. Makanan Sehat", correct: false },
+                    { text: "D. Angin Kencang", correct: false }
+                ],
+                explain: "Panas matahari menguapkan air pada pakaian basah sehingga kering dengan cepat."
+            },
+            {
+                question: "3. Tubuh kita butuh makan teratur setiap hari agar mendapatkan energi. Tanpa makanan, tubuh kita akan...",
+                options: [
+                    { text: "A. Semakin gemuk dan ceria", correct: false },
+                    { text: "B. Kuat mendaki gunung", correct: false },
+                    { text: "C. Lemas dan mudah sakit", correct: true },
+                    { text: "D. Berlari sangat cepat", correct: false }
+                ],
+                explain: "Makanan diolah tubuh kita menjadi tenaga/energi untuk beraktivitas. Tanpa makanan, kita tidak punya bahan bakar!"
+            },
+            {
+                question: "4. Manakah di bawah ini contoh perilaku hemat energi yang paling benar?",
+                options: [
+                    { text: "A. Menyalakan lampu kamar di siang hari bolong", correct: false },
+                    { text: "B. Membiarkan kipas angin menyala saat tidak ada orang", correct: false },
+                    { text: "C. Mematikan keran air setelah wadah terisi penuh", correct: true },
+                    { text: "D. Menonton TV semalaman sampai ketiduran", correct: false }
+                ],
+                explain: "Menghemat air berarti menghemat energi pompa listrik dan kelestarian sumber daya bumi!"
+            },
+            {
+                question: "5. Pembangkit listrik yang menggunakan air terjun raksasa dinamakan...",
+                options: [
+                    { text: "A. PLTA (Tenaga Air)", correct: true },
+                    { text: "B. PLTB (Tenaga Angin)", correct: false },
+                    { text: "C. Panel Surya", correct: false },
+                    { text: "D. Lilin darurat", correct: false }
+                ],
+                explain: "PLTA memanfaatkan jatuhnya debit air waduk ke turbin raksasa untuk menciptakan listrik ramah lingkungan."
+            }
+        ];
+
+        function startQuiz() {
+            showScreen('quiz');
+        }
+
+        function initQuiz() {
+            state.quiz.currentIndex = 0;
+            state.quiz.score = 0;
+            state.quiz.isAnswered = false;
+
+            loadQuizQuestion();
+        }
+
+        function loadQuizQuestion() {
+            const currentQ = quizDatabase[state.quiz.currentIndex];
+            state.quiz.isAnswered = false;
+
+            // Hide feedback and Next button
+            document.getElementById('quiz-feedback-box').classList.add('hidden');
+            document.getElementById('btn-quiz-next').classList.add('hidden');
+
+            // Update Progress bar
+            const totalQ = quizDatabase.length;
+            const progressPercent = ((state.quiz.currentIndex + 1) / totalQ) * 100;
+            document.getElementById('quiz-question-number').innerText = `Pertanyaan ${state.quiz.currentIndex + 1} dari ${totalQ}`;
+            document.getElementById('quiz-progress-fill').style.width = `${progressPercent}%`;
+            document.getElementById('quiz-score-indicator').innerText = `Nilai: ${state.quiz.score}`;
+
+            // Set Question Text
+            document.getElementById('quiz-question-text').innerText = currentQ.question;
+
+            // Populate options
+            const optionsContainer = document.getElementById('quiz-options-container');
+            optionsContainer.innerHTML = '';
+
+            currentQ.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 bg-white hover:bg-sky-50 text-slate-800 font-bold rounded-2xl border-2 border-sky-200 shadow transition-all flex items-center justify-between";
+                btn.innerHTML = `
+                    <span>${opt.text}</span>
+                    <i class="fa-regular fa-circle text-slate-300"></i>
+                `;
+                btn.onclick = () => submitQuizAnswer(opt, btn, idx);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function submitQuizAnswer(selectedOption, clickedButton, index) {
+            if (state.quiz.isAnswered) return; // safeguard double tap
+            
+            state.quiz.isAnswered = true;
+            const currentQ = quizDatabase[state.quiz.currentIndex];
+
+            // Feedback box selection
+            const feedbackBox = document.getElementById('quiz-feedback-box');
+            const feedbackEmoji = document.getElementById('quiz-feedback-emoji');
+            const feedbackTitle = document.getElementById('quiz-feedback-title');
+            const feedbackDesc = document.getElementById('quiz-feedback-desc');
+
+            feedbackBox.classList.remove('hidden');
+
+            if (selectedOption.correct) {
+                // Correct Answer!
+                state.quiz.score += 20; // 5 questions * 20 = 100 perfect score
+                playSound('success');
+                addStars(5);
+
+                clickedButton.className = "w-full text-left p-4 bg-emerald-500 text-white font-bold rounded-2xl border-2 border-emerald-600 shadow-md flex items-center justify-between";
+                clickedButton.innerHTML = `<span>${selectedOption.text}</span> <i class="fa-solid fa-circle-check"></i>`;
+                
+                feedbackBox.className = "flex items-start gap-4 p-4 bg-emerald-50 border-2 border-emerald-200 rounded-2xl mb-4";
+                feedbackEmoji.innerText = "🎉";
+                feedbackTitle.innerText = "YAY! Jawabanmu Benar!";
+                feedbackDesc.innerHTML = `Hebat! ${currentQ.explain}`;
+            } else {
+                // Wrong Answer
+                playSound('fail');
+                clickedButton.className = "w-full text-left p-4 bg-red-500 text-white font-bold rounded-2xl border-2 border-red-600 shadow-md flex items-center justify-between";
+                clickedButton.innerHTML = `<span>${selectedOption.text}</span> <i class="fa-solid fa-circle-xmark"></i>`;
+
+                // Highlight correct button as helper visual
+                const correctIdx = currentQ.options.findIndex(o => o.correct);
+                const correctButton = document.getElementById('quiz-options-container').children[correctIdx];
+                correctButton.className = "w-full text-left p-4 bg-emerald-100 text-emerald-800 font-bold rounded-2xl border-2 border-emerald-300 flex items-center justify-between pointer-events-none";
+                correctButton.innerHTML = `<span>${currentQ.options[correctIdx].text}</span> <i class="fa-solid fa-circle-check text-emerald-600"></i>`;
+
+                feedbackBox.className = "flex items-start gap-4 p-4 bg-amber-50 border-2 border-amber-200 rounded-2xl mb-4";
+                feedbackEmoji.innerText = "💡";
+                feedbackTitle.innerText = "Oops! Belum Tepat Sobat.";
+                feedbackDesc.innerHTML = `Jawaban yang benar adalah yang berwarna hijau. <br> <strong>Mengapa?</strong> ${currentQ.explain}`;
+            }
+
+            // Lock all other buttons
+            const parent = document.getElementById('quiz-options-container');
+            for (let child of parent.children) {
+                child.classList.add('pointer-events-none');
+            }
+
+            // Show Next Button
+            document.getElementById('btn-quiz-next').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            playSound('click');
+            state.quiz.currentIndex++;
+
+            if (state.quiz.currentIndex < quizDatabase.length) {
+                loadQuizQuestion();
+            } else {
+                // Quiz completed! Go to certificate reward
+                finishQuizGame();
+            }
+        }
+
+        function finishQuizGame() {
+            playSound('level-up');
+            addStars(15);
+            
+            // Set final score indicator on reward
+            triggerMascotSpeech(`Wow! Kamu mendapat skor kuis sebesar ${state.quiz.score}/100! Sungguh hebat! Klik Sertifikat untuk merayakan kesuksesanmu.`);
+            showScreen('certificate');
+        }
+
+
+        
+        // Generate Falling Confetti Stars on Certificate Page
+        function generateConfetti() {
+            const container = document.getElementById('cert-confetti-bg');
+            container.innerHTML = '';
+            
+            const emojis = ['🎉', '✨', '🌟', '🥇', '⚡', '☀️', '💧'];
+            for (let i = 0; i < 25; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'absolute text-xl pointer-events-none animate-bounce';
+                conf.style.left = `${Math.random() * 100}%`;
+                conf.style.top = `${Math.random() * -100}px`;
+                conf.style.fontSize = `${16 + Math.random() * 16}px`;
+                conf.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                // Random fall speed & delay
+                const speed = 2 + Math.random() * 4;
+                const delay = Math.random() * 2;
+                conf.style.animation = `fall ${speed}s linear ${delay}s infinite`;
+                
+                container.appendChild(conf);
+            }
+        }
+
+        // Window Initializer
+        window.onload = function() {
+            // Initiate default landing
+            showScreen('home');
+            
+            // Set initial placeholders in input forms
+            document.getElementById('input-student-name').value = "";
+            document.getElementById('input-student-class').value = "3";
+            document.getElementById('input-student-school').value = "";
+            
+            // Synchronize on load
+            saveStudentIdentity();
+            
+            // Trigger welcome greeting after a small second delay
+            setTimeout(() => {
+                triggerMascotSpeech("Hai! Selamat datang di Petualangan Energi Cilik! Tulis namamu di kotak profil dulu ya agar namamu tercatat di sertifikat juara!");
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
